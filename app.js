@@ -11,12 +11,12 @@ let stream = null;
  */
 async function startCamera() {
     try {
-        // まず通常の facingMode: 'user' で試行（前面カメラ）
+        // 後方カメラ（背面カメラ）で撮影
         const constraints = {
             video: {
-                facingMode: 'user', // 前面カメラを指定
-                width: { ideal: 1280 },
-                height: { ideal: 720 }
+                facingMode: 'environment', // 後方カメラを指定
+                width: { ideal: 1920 },
+                height: { ideal: 1080 }
             },
             audio: false
         };
