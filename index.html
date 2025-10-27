@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>カメラアプリ</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>カメラアプリ</h1>
+
+        <!-- カメラのビデオストリーム -->
+        <div class="video-container">
+            <video id="video" autoplay playsinline></video>
+        </div>
+
+        <!-- 撮影ボタン -->
+        <button id="capture-btn" class="capture-button">📷 写真を撮る</button>
+
+        <!-- 撮影した画像の表示エリア -->
+        <div class="photos-container">
+            <h2>撮影した写真</h2>
+            <div id="photos" class="photos-grid"></div>
+        </div>
+
+        <!-- Canvasは非表示で画像キャプチャに使用 -->
+        <canvas id="canvas" style="display: none;"></canvas>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
