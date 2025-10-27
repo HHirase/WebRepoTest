@@ -15,8 +15,17 @@
             <video id="video" autoplay playsinline></video>
         </div>
 
-        <!-- 撮影ボタン -->
-        <button id="capture-btn" class="capture-button">📷 写真を撮る</button>
+        <!-- 撮影ボタンとマイクボタン -->
+        <div class="button-container">
+            <button id="capture-btn" class="capture-button">📷 写真を撮る</button>
+            <button id="mic-btn" class="mic-button">🎤 音声認識</button>
+        </div>
+
+        <!-- 音声認識結果の表示エリア -->
+        <div class="transcription-container">
+            <h2>音声認識結果</h2>
+            <div id="transcription" class="transcription-text"></div>
+        </div>
 
         <!-- 撮影した画像の表示エリア -->
         <div class="photos-container">
