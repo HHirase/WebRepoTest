@@ -7,55 +7,19 @@ const photosContainer = document.getElementById('photos');
 let stream = null;
 
 /**
- * 利用可能なカメラデバイスを列挙し、前面カメラを見つける
- * @returns {Promise<string|null>} - 前面カメラのデバイスID、見つからない場合はnull
- */
-async function findFrontCamera() {
-    try {
-        const devices = await navigator.mediaDevices.enumerateDevices();
-        const videoDevices = devices.filter(device => device.kind === 'videoinput');
-
-        // ラベルに"front"や"user"が含まれるカメラを探す
-        const frontCamera = videoDevices.find(device =>
-            device.label.toLowerCase().includes('front') ||
-            device.label.toLowerCase().includes('user') ||
-            device.label.toLowerCase().includes('フロント') ||
-            device.label.toLowerCase().includes('前面')
-        );
-
-        return frontCamera ? frontCamera.deviceId : null;
-    } catch (error) {
-        console.error('カメラデバイスの列挙エラー:', error);
-        return null;
-    }
-}
-
-/**
  * カメラを起動する
  */
 async function startCamera() {
     try {
-        // まず前面カメラのデバイスIDを取得
-        const frontCameraId = await findFrontCamera();
-
-        let constraints;
-        if (frontCameraId) {
-            // 前面カメラが見つかった場合は、そのデバイスIDを指定
-            constraints = {
-                video: {
-                    deviceId: { exact: frontCameraId }
-                },
-                audio: false
-            };
-        } else {
-            // 見つからない場合は facingMode で指定
-            constraints = {
-                video: {
-                    facingMode: 'user' // フロントカメラを使用
-                },
-                audio: false
-            };
-        }
+        // iOS Safari では facingMode を { exact: 'user' } で指定する必要がある
+        const constraints = {
+            video: {
+                facingMode: { exact: 'user' }, // 前面カメラを厳密に指定
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            },
+            audio: false
+        };
 
         // ユーザーのカメラにアクセス
         stream = await navigator.mediaDevices.getUserMedia(constraints);
@@ -64,7 +28,22 @@ async function startCamera() {
         video.srcObject = stream;
     } catch (error) {
         console.error('カメラへのアクセスエラー:', error);
-        alert('カメラへのアクセスに失敗しました。カメラの使用を許可してください。');
+
+        // facingMode: { exact: 'user' } で失敗した場合のフォールバック
+        try {
+            console.log('フォールバックモードで再試行中...');
+            const fallbackConstraints = {
+                video: {
+                    facingMode: 'user' // exact を外して再試行
+                },
+                audio: false
+            };
+            stream = await navigator.mediaDevices.getUserMedia(fallbackConstraints);
+            video.srcObject = stream;
+        } catch (fallbackError) {
+            console.error('フォールバックもエラー:', fallbackError);
+            alert('カメラへのアクセスに失敗しました。カメラの使用を許可してください。');
+        }
     }
 }
 
