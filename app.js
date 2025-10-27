@@ -9,6 +9,7 @@ const transcriptionElement = document.getElementById('transcription');
 let stream = null;
 let recognition = null;
 let isRecording = false;
+let finalTranscript = ''; // 確定したテキストを保持
 
 /**
  * カメラを起動する
@@ -121,36 +122,21 @@ function initSpeechRecognition() {
     // 音声認識結果のイベントハンドラ
     recognition.onresult = (event) => {
         let interimTranscript = '';
-        let finalTranscript = '';
 
         // 認識結果を処理
         for (let i = event.resultIndex; i < event.results.length; i++) {
             const transcript = event.results[i][0].transcript;
             if (event.results[i].isFinal) {
+                // 確定した結果を保存
                 finalTranscript += transcript + '\n';
             } else {
+                // 途中結果を保存
                 interimTranscript += transcript;
             }
         }
 
-        // 結果を表示
-        if (finalTranscript) {
-            transcriptionElement.textContent += finalTranscript;
-        }
-
-        // 途中結果を末尾に表示
-        if (interimTranscript) {
-            const currentText = transcriptionElement.textContent;
-            const lines = currentText.split('\n');
-            const lastLine = lines[lines.length - 1];
-
-            // 最後の行が途中結果の場合は置き換え、そうでなければ追加
-            if (lastLine && !lastLine.trim()) {
-                transcriptionElement.textContent = currentText + interimTranscript;
-            } else {
-                transcriptionElement.textContent = currentText + '\n' + interimTranscript;
-            }
-        }
+        // 確定結果 + 途中結果を表示
+        transcriptionElement.textContent = finalTranscript + interimTranscript;
     };
 
     // エラーハンドリング
@@ -193,7 +179,8 @@ function toggleSpeechRecognition() {
     } else {
         // 録音開始
         isRecording = true;
-        transcriptionElement.textContent = ''; // テキストをクリア
+        finalTranscript = ''; // 確定テキストをクリア
+        transcriptionElement.textContent = ''; // 表示をクリア
         recognition.start();
         micBtn.classList.add('recording');
         micBtn.textContent = '⏹️ 停止';
