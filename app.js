@@ -11,10 +11,10 @@ let stream = null;
  */
 async function startCamera() {
     try {
-        // iOS Safari では facingMode を { exact: 'user' } で指定する必要がある
+        // まず通常の facingMode: 'user' で試行（前面カメラ）
         const constraints = {
             video: {
-                facingMode: { exact: 'user' }, // 前面カメラを厳密に指定
+                facingMode: 'user', // 前面カメラを指定
                 width: { ideal: 1280 },
                 height: { ideal: 720 }
             },
@@ -26,24 +26,12 @@ async function startCamera() {
 
         // ビデオ要素にストリームを設定
         video.srcObject = stream;
+
+        // ストリームが開始されたことを確認
+        console.log('カメラストリーム開始:', stream.getVideoTracks()[0].getSettings());
     } catch (error) {
         console.error('カメラへのアクセスエラー:', error);
-
-        // facingMode: { exact: 'user' } で失敗した場合のフォールバック
-        try {
-            console.log('フォールバックモードで再試行中...');
-            const fallbackConstraints = {
-                video: {
-                    facingMode: 'user' // exact を外して再試行
-                },
-                audio: false
-            };
-            stream = await navigator.mediaDevices.getUserMedia(fallbackConstraints);
-            video.srcObject = stream;
-        } catch (fallbackError) {
-            console.error('フォールバックもエラー:', fallbackError);
-            alert('カメラへのアクセスに失敗しました。カメラの使用を許可してください。');
-        }
+        alert('カメラへのアクセスに失敗しました。カメラの使用を許可してください。');
     }
 }
 
