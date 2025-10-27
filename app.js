@@ -7,15 +7,58 @@ const photosContainer = document.getElementById('photos');
 let stream = null;
 
 /**
+ * 利用可能なカメラデバイスを列挙し、前面カメラを見つける
+ * @returns {Promise<string|null>} - 前面カメラのデバイスID、見つからない場合はnull
+ */
+async function findFrontCamera() {
+    try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const videoDevices = devices.filter(device => device.kind === 'videoinput');
+
+        // ラベルに"front"や"user"が含まれるカメラを探す
+        const frontCamera = videoDevices.find(device =>
+            device.label.toLowerCase().includes('front') ||
+            device.label.toLowerCase().includes('user') ||
+            device.label.toLowerCase().includes('フロント') ||
+            device.label.toLowerCase().includes('前面')
+        );
+
+        return frontCamera ? frontCamera.deviceId : null;
+    } catch (error) {
+        console.error('カメラデバイスの列挙エラー:', error);
+        return null;
+    }
+}
+
+/**
  * カメラを起動する
  */
 async function startCamera() {
     try {
+        // まず前面カメラのデバイスIDを取得
+        const frontCameraId = await findFrontCamera();
+
+        let constraints;
+        if (frontCameraId) {
+            // 前面カメラが見つかった場合は、そのデバイスIDを指定
+            constraints = {
+                video: {
+                    deviceId: { exact: frontCameraId }
+                },
+                audio: false
+            };
+        } else {
+            // 見つからない場合は facingMode で指定
+            constraints = {
+                video: {
+                    facingMode: 'user' // フロントカメラを使用
+                },
+                audio: false
+            };
+        }
+
         // ユーザーのカメラにアクセス
-        stream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: 'user' }, // フロントカメラを使用
-            audio: false
-        });
+        stream = await navigator.mediaDevices.getUserMedia(constraints);
 
         // ビデオ要素にストリームを設定
         video.srcObject = stream;
